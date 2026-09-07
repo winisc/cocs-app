@@ -1,7 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { grupoDe } from '../../content/anamnese'
 
-const TEMPO_EXPANSAO_MS = 1200
+const TEMPO_EXPANSAO_MS = 220
 const LARGURA_MAXIMA_ROLAGEM_MOBILE = 639
 
 /**

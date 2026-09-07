@@ -143,16 +143,20 @@
     height: var(--altura-expansivel, 0);
     overflow: hidden;
     opacity: 0;
+    /* 220ms em toda tela. O celular estava em 1200ms e o desktop em 420ms —
+       diferença que ninguém pediu, e que fazia a mesma caixa parecer dois
+       componentes. 220 é o que se via no Windows com animações desligadas, e
+       foi olhando esse número que a velocidade foi aprovada. */
     transition:
-      height 1200ms cubic-bezier(0.37, 0, 0.63, 1),
-      opacity 950ms cubic-bezier(0.37, 0, 0.63, 1);
+      height 220ms cubic-bezier(0.37, 0, 0.63, 1),
+      opacity 180ms cubic-bezier(0.37, 0, 0.63, 1);
   }
 
   .expansivel__conteudo {
     display: flow-root;
     transform: translateY(-0.75rem);
     transform-origin: top;
-    transition: transform 1200ms cubic-bezier(0.37, 0, 0.63, 1);
+    transition: transform 220ms cubic-bezier(0.37, 0, 0.63, 1);
   }
 
   /* Sem tempo próprio: abrir e fechar são o mesmo movimento ao contrário.
@@ -173,23 +177,25 @@
     transform: translateY(0);
   }
 
+  /* No desktop a caixa só cresce, sem o deslize: lá o bloco inteiro cabe na
+     tela, e o movimento extra vira enfeite. */
   @media (min-width: 640px) {
-    .expansivel {
-      transition:
-        height 420ms cubic-bezier(0.37, 0, 0.63, 1),
-        opacity 280ms cubic-bezier(0.37, 0, 0.63, 1);
-    }
-
     .expansivel__conteudo {
       transform: none;
       transition: none;
     }
   }
 
+  /* Quem pede menos movimento perde o deslize, não o tempo: a 220ms o que
+     pode incomodar é o conteúdo se mexendo, não a caixa crescendo. */
   @media (prefers-reduced-motion: reduce) {
-    .expansivel,
     .expansivel__conteudo {
-      transition-duration: 220ms;
+      transform: none;
+      transition: none;
+    }
+
+    .expansivel {
+      transition-duration: 120ms;
     }
   }
 }
