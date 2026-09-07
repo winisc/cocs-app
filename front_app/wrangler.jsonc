@@ -5,7 +5,7 @@
   //
   // Não há código de Worker aqui. É só o conteúdo de dist/ servido pela
   // Cloudflare, com o roteamento de página única resolvido na borda.
-  "name": "cocs-painel",
+  "name": "cocs-app",
   "compatibility_date": "2026-09-07",
 
   "assets": {
@@ -13,7 +13,11 @@
 
     // Toda rota que não é arquivo cai no index.html, e o React Router assume
     // dali. Sem isso, recarregar em /dashboard/pacientes dá 404 — essas rotas
-    // só existem no navegador. É o mesmo papel do public/_redirects.
+    // só existem no navegador.
+    //
+    // É por aqui, e não por um `_redirects` com `/* /index.html 200`: neste
+    // fluxo a Cloudflare recusa aquela regra como laço infinito, porque ela
+    // também casaria com o próprio /index.html que serve de destino.
     "not_found_handling": "single-page-application"
   }
 }
