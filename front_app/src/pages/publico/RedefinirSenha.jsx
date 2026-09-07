@@ -68,7 +68,7 @@ export default function RedefinirSenha() {
         rodape={<VoltarAoLogin />}
       >
         <div className="mt-6 rounded-xl border border-mint-200 bg-mint-50 px-4 py-4 text-sm leading-relaxed text-mint-900">
-          Este link não serve mais. Guarde a senha nova onde você guarda as suas.
+          Este link não serve mais. Guarde a senha nova.
         </div>
       </AuthLayout>
     )
