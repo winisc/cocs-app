@@ -7,12 +7,15 @@ import BotaoVerSenha from '../components/BotaoVerSenha'
 import { Verificando } from '../components/RequireAuth'
 import { Enviar, Erro } from './Login'
 import { temSessaoLocal } from '../lib/auth'
+import { useTitulo } from '../lib/titulo'
 
 /** Mínimo suficiente para não aceitar senha trivial. A regra de verdade é do
  *  servidor — validação de tela só existe para dar resposta rápida. */
 const MINIMO_SENHA = 8
 
 export default function Register() {
+  useTitulo('Criar conta')
+
   const { usuario, carregando, cadastrar } = useSession()
 
   const [nome, setNome] = useState('')

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useTitulo } from '../lib/titulo'
 
 /**
  * Mesma página de 404 da landing, reescrita em componente.
@@ -12,6 +13,8 @@ import { Link } from 'react-router-dom'
  * manda para o login sozinha.
  */
 export default function NaoEncontrada() {
+  useTitulo('Página não encontrada')
+
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center bg-navy-900 px-8 py-10 text-center">
       <h1 className="font-display text-2xl font-semibold text-navy-50">Página não encontrada</h1>

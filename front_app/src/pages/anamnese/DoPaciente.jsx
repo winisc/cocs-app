@@ -23,6 +23,7 @@ import Voltar from '../../components/painel/Voltar'
 import BotaoIcone, { IconeExcluir } from '../../components/painel/BotaoIcone'
 import { Aviso } from '../usuarios/Secao'
 import { Situacao } from './Lista'
+import { useTitulo } from '../../lib/titulo'
 
 const INTERVALO_ATUALIZACAO_MS = 5000
 
@@ -48,28 +49,34 @@ export default function AnamneseDoPaciente() {
   const temporizadorDeRealce = useRef(null)
   const [realcadas, setRealcadas] = useState(() => new Set())
 
-  const recarregar = useCallback(async ({ silencioso = false } = {}) => {
-    try {
-      const [p, lista] = await Promise.all([
-        buscarPaciente(pacienteId),
-        anamnesesDoPaciente(pacienteId),
-      ])
-      const mudaram = idsComSituacaoAlterada(situacoesConhecidas.current, lista, silencioso)
+  // Antes dos retornos antecipados: hook não pode ficar atrás de um `if`.
+  useTitulo(paciente ? `${nomeCompleto(paciente)} · Histórico` : 'Histórico de anamneses')
 
-      setPaciente(p)
-      setAnamneses(lista)
-      if (mudaram.length) {
-        clearTimeout(temporizadorDeRealce.current)
-        setRealcadas(new Set(mudaram))
-        temporizadorDeRealce.current = setTimeout(() => setRealcadas(new Set()), 1800)
+  const recarregar = useCallback(
+    async ({ silencioso = false } = {}) => {
+      try {
+        const [p, lista] = await Promise.all([
+          buscarPaciente(pacienteId),
+          anamnesesDoPaciente(pacienteId),
+        ])
+        const mudaram = idsComSituacaoAlterada(situacoesConhecidas.current, lista, silencioso)
+
+        setPaciente(p)
+        setAnamneses(lista)
+        if (mudaram.length) {
+          clearTimeout(temporizadorDeRealce.current)
+          setRealcadas(new Set(mudaram))
+          temporizadorDeRealce.current = setTimeout(() => setRealcadas(new Set()), 1800)
+        }
+        setErro(null)
+      } catch (e) {
+        if (!silencioso) setErro(e.message)
+      } finally {
+        if (!silencioso) setCarregando(false)
       }
-      setErro(null)
-    } catch (e) {
-      if (!silencioso) setErro(e.message)
-    } finally {
-      if (!silencioso) setCarregando(false)
-    }
-  }, [pacienteId])
+    },
+    [pacienteId],
+  )
 
   useEffect(() => {
     recarregar()
@@ -353,13 +360,14 @@ function CardDaAnamnese({ anamnese, atualizada = false, acoes = null, children }
       <div className="flex flex-wrap items-start justify-between gap-3">
         <Situacao anamnese={anamnese} />
         <div className="flex items-center gap-2">
-          <p className="text-xs text-navy-400">
-            Enviada por {anamnese.criadaPor ?? 'Equipe COCS'}
-          </p>
+          <p className="text-xs text-navy-400">Enviada por {anamnese.criadaPor ?? 'Equipe COCS'}</p>
           {acoes}
         </div>
       </div>
-      <div key={`${anamnese.id}-${situacao}`} className={atualizada ? 'anamnese-conteudo-entrada' : ''}>
+      <div
+        key={`${anamnese.id}-${situacao}`}
+        className={atualizada ? 'anamnese-conteudo-entrada' : ''}
+      >
         {children}
       </div>
     </li>

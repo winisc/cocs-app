@@ -6,6 +6,7 @@ import RespostasDaAnamnese from '../../components/painel/RespostasDaAnamnese'
 import Voltar from '../../components/painel/Voltar'
 import { AindaVazio } from '../../components/Painel'
 import { Aviso } from '../usuarios/Secao'
+import { useTitulo } from '../../lib/titulo'
 
 /**
  * A anamnese do paciente, vista da ficha dele.
@@ -25,6 +26,9 @@ export default function AnamneseAtualDoPaciente() {
   const [anamneses, setAnamneses] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState(null)
+
+  // Antes dos retornos antecipados: hook não pode ficar atrás de um `if`.
+  useTitulo(paciente ? `${nomeCompleto(paciente)} · Anamnese` : 'Anamnese do paciente')
 
   useEffect(() => {
     let vivo = true

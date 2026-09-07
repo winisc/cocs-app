@@ -4,6 +4,7 @@ import { buscarPorToken, responderAnamnese } from '../../lib/anamneses'
 import { ABERTURA, PERGUNTAS, TITULO, respostaEmTexto, validar } from '../../content/anamnese'
 import Pergunta from './Pergunta'
 import Botao from '../../components/painel/Botao'
+import { useTitulo } from '../../lib/titulo'
 
 /**
  * A anamnese que o paciente responde, pelo link temporário.
@@ -25,6 +26,10 @@ export default function AnamnesePublica() {
   const [enviando, setEnviando] = useState(false)
   const [enviada, setEnviada] = useState(false)
   const [erroDoEnvio, setErroDoEnvio] = useState(null)
+
+  // Sem o nome de quem responde: a aba fica aberta num celular que passa de
+  // mão em mão na recepção.
+  useTitulo(TITULO)
 
   useEffect(() => {
     let vivo = true

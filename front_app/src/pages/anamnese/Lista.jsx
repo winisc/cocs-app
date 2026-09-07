@@ -19,6 +19,7 @@ import DialogoNova from './DialogoNova'
 import { Aviso, Vazio } from '../usuarios/Secao'
 import { pode } from '../../lib/permissoes'
 import { useSession } from '../../lib/session'
+import { useTitulo } from '../../lib/titulo'
 
 const INTERVALO_ATUALIZACAO_MS = 5000
 
@@ -31,6 +32,8 @@ const INTERVALO_ATUALIZACAO_MS = 5000
  * cronológica.
  */
 export default function ListaDeAnamneses() {
+  useTitulo('Anamneses')
+
   const navegar = useNavigate()
   const { usuario } = useSession()
   const podeCriarAnamnese = pode(usuario, 'criarAnamnese')
@@ -152,7 +155,11 @@ export default function ListaDeAnamneses() {
             { rotulo: 'Paciente' },
             { rotulo: 'Situação', largura: 'w-56', some: true },
             { rotulo: 'Enviada por', largura: 'w-44', some: true },
-            { rotulo: 'Ações', largura: podeExcluirAnamnese ? 'w-28' : 'w-[5.75rem]', direita: true },
+            {
+              rotulo: 'Ações',
+              largura: podeExcluirAnamnese ? 'w-28' : 'w-[5.75rem]',
+              direita: true,
+            },
           ]}
         >
           {encontradas.map((a) => (
@@ -163,10 +170,7 @@ export default function ListaDeAnamneses() {
               }`}
             >
               <Celula>
-                <Pessoa
-                  nome={nomeCompleto(a.paciente)}
-                  abaixo={<Situacao anamnese={a} />}
-                />
+                <Pessoa nome={nomeCompleto(a.paciente)} abaixo={<Situacao anamnese={a} />} />
               </Celula>
 
               <Celula some>

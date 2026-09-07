@@ -6,6 +6,7 @@ import BotaoIcone, { IconeAprovar, IconeRecusar } from '../../components/painel/
 import Tabela, { Acoes, Celula, Pessoa } from '../../components/painel/Tabela'
 import Select from '../../components/painel/Select'
 import { Vazio, useUsuarios } from './Secao'
+import { useTitulo } from '../../lib/titulo'
 
 /**
  * Quem se cadastra na tela pública entra aqui, não na lista de usuários.
@@ -14,6 +15,8 @@ import { Vazio, useUsuarios } from './Secao'
  * o pedido escolher seria o mesmo que não ter aprovação nenhuma.
  */
 export default function Solicitacoes() {
+  useTitulo('Solicitações de acesso')
+
   const { solicitacoes, busca, recarregar } = useUsuarios()
   const [aprovando, setAprovando] = useState(null)
   const [recusando, setRecusando] = useState(null)

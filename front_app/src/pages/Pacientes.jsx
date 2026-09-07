@@ -20,8 +20,11 @@ import Field from '../components/Field'
 import { Aviso, Vazio } from './usuarios/Secao'
 import { pode } from '../lib/permissoes'
 import { useSession } from '../lib/session'
+import { useTitulo } from '../lib/titulo'
 
 export default function Pacientes() {
+  useTitulo('Pacientes')
+
   const navegar = useNavigate()
   const { usuario } = useSession()
   const podeGerenciarPacientes = pode(usuario, 'gerenciarPacientes')
@@ -117,10 +120,7 @@ export default function Pacientes() {
                   </BotaoIcone>
 
                   {podeGerenciarPacientes && (
-                    <BotaoIcone
-                      rotulo={`Editar ${nomeCompleto(p)}`}
-                      onClick={() => setEditando(p)}
-                    >
+                    <BotaoIcone rotulo={`Editar ${nomeCompleto(p)}`} onClick={() => setEditando(p)}>
                       <IconeEditar />
                     </BotaoIcone>
                   )}

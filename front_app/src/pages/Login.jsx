@@ -6,8 +6,11 @@ import Field from '../components/Field'
 import BotaoVerSenha from '../components/BotaoVerSenha'
 import { Verificando } from '../components/RequireAuth'
 import { temSessaoLocal } from '../lib/auth'
+import { useTitulo } from '../lib/titulo'
 
 export default function Login() {
+  useTitulo('Entrar')
+
   const { usuario, carregando, entrar } = useSession()
   const navegar = useNavigate()
   const local = useLocation()

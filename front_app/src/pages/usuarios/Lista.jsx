@@ -8,8 +8,11 @@ import Tabela, { Acoes, Celula, Etiqueta, Pessoa } from '../../components/painel
 import Select from '../../components/painel/Select'
 import Field from '../../components/Field'
 import { Vazio, useUsuarios } from './Secao'
+import { useTitulo } from '../../lib/titulo'
 
 export default function ListaDeUsuarios() {
+  useTitulo('Usuários')
+
   const { usuarios, busca, recarregar } = useUsuarios()
   const { usuario: eu } = useSession()
 
