@@ -1,0 +1,19 @@
+{
+  // Deploy na Cloudflare pelo fluxo de Workers (`npx wrangler deploy`), o
+  // mesmo que a landing usa. No fluxo de Pages este arquivo é ignorado: lá
+  // basta o comando de build e a pasta de saída.
+  //
+  // Não há código de Worker aqui. É só o conteúdo de dist/ servido pela
+  // Cloudflare, com o roteamento de página única resolvido na borda.
+  "name": "cocs-painel",
+  "compatibility_date": "2026-09-07",
+
+  "assets": {
+    "directory": "./dist",
+
+    // Toda rota que não é arquivo cai no index.html, e o React Router assume
+    // dali. Sem isso, recarregar em /dashboard/pacientes dá 404 — essas rotas
+    // só existem no navegador. É o mesmo papel do public/_redirects.
+    "not_found_handling": "single-page-application"
+  }
+}
