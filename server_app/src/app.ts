@@ -28,7 +28,10 @@ export async function buildApp() {
 
   await app.register(jwt, {
     secret: env.JWT_SECRET,
-    sign: { expiresIn: '8h' },
+    // 30 dias. A clínica usa o painel o dia inteiro em computador próprio, e
+    // pedir login a cada oito horas era atrito sem ganho: quem entra é sempre
+    // a mesma equipe, e sair de verdade é o botão Sair.
+    sign: { expiresIn: '30d' },
   })
 
   await app.register(rateLimit, {

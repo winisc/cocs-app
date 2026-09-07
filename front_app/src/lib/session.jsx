@@ -25,6 +25,13 @@ export function SessionProvider({ children }) {
       .catch(() => {
         // Falha ao restaurar é o mesmo que não ter sessão: manda para o login.
         // Não é erro para mostrar na tela — quem nunca entrou também cai aqui.
+        //
+        // E apaga o que estiver guardado. Sem isso, um token que o servidor
+        // recusa — vencido, usuário excluído, segredo rotacionado — deixa
+        // `temSessaoLocal()` dizendo que há sessão: o /login manda para o
+        // painel, a guarda manda de volta, e a pessoa fica no meio de um
+        // vaivém sem fim. Com 30 dias no localStorage isso deixou de ser raro.
+        auth.signOut()
         if (vivo) setUsuario(null)
       })
       .finally(() => {

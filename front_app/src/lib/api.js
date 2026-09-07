@@ -15,16 +15,16 @@ export function apiConfigurada() {
 }
 
 export function salvarToken(token) {
-  sessionStorage.setItem(CHAVE_TOKEN, token)
+  localStorage.setItem(CHAVE_TOKEN, token)
 }
 
 export function tokenAtual() {
-  return sessionStorage.getItem(CHAVE_TOKEN)
+  return localStorage.getItem(CHAVE_TOKEN)
 }
 
 export function limparSessaoApi() {
-  sessionStorage.removeItem(CHAVE_TOKEN)
-  sessionStorage.removeItem(CHAVE_SESSAO)
+  localStorage.removeItem(CHAVE_TOKEN)
+  localStorage.removeItem(CHAVE_SESSAO)
 }
 
 export async function apiFetch(caminho, opcoes = {}) {

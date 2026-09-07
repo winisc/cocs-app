@@ -1,7 +1,13 @@
 /**
  * Autenticação do painel.
  *
- * O token JWT fica no `sessionStorage`: ao fechar o navegador a sessão cai.
+ * O token JWT fica no `localStorage`, e não no `sessionStorage`: este último é
+ * por aba, e abrir o painel numa aba nova caía no login com a pessoa já
+ * logada na outra. Vale 30 dias, o mesmo prazo do token no servidor.
+ *
+ * O preço é que a sessão sobrevive a fechar o navegador. Num computador
+ * compartilhado da recepção, sair de verdade passa a depender do botão Sair.
+ *
  * O backend continua sendo a fonte de verdade via `/auth/me` a cada recarga.
  */
 import { apiConfigurada, apiFetch, limparSessaoApi, salvarToken, tokenAtual } from './api'
@@ -49,7 +55,7 @@ const SEM_SERVIDOR =
  */
 export async function restoreSession() {
   if (MODO_FALSO) {
-    const salva = sessionStorage.getItem(CHAVE_SESSAO)
+    const salva = localStorage.getItem(CHAVE_SESSAO)
     return salva ? JSON.parse(salva) : null
   }
 
@@ -61,7 +67,7 @@ export async function restoreSession() {
 }
 
 export function temSessaoLocal() {
-  if (MODO_FALSO) return Boolean(sessionStorage.getItem(CHAVE_SESSAO))
+  if (MODO_FALSO) return Boolean(localStorage.getItem(CHAVE_SESSAO))
   return Boolean(tokenAtual())
 }
 
@@ -101,20 +107,20 @@ export async function signUp({ nome, email, senha }) {
 }
 
 export async function signOut() {
-  if (MODO_FALSO) sessionStorage.removeItem(CHAVE_SESSAO)
+  if (MODO_FALSO) localStorage.removeItem(CHAVE_SESSAO)
   else limparSessaoApi()
 }
 
 function abrirSessaoFalsa(email, nome) {
   const usuario = { nome: nome || email.split('@')[0], email, papel: 'admin' }
-  sessionStorage.setItem(CHAVE_SESSAO, JSON.stringify(usuario))
+  localStorage.setItem(CHAVE_SESSAO, JSON.stringify(usuario))
   return usuario
 }
 
 function abrirSessaoApi(dados) {
   salvarToken(dados.token)
   const usuario = normalizarUsuario(dados.usuario)
-  sessionStorage.setItem(CHAVE_SESSAO, JSON.stringify(usuario))
+  localStorage.setItem(CHAVE_SESSAO, JSON.stringify(usuario))
   return usuario
 }
 
