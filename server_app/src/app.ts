@@ -20,6 +20,10 @@ export async function buildApp() {
   await app.register(cors, {
     origin: env.CORS_ORIGIN,
     credentials: true,
+    // O padrão do @fastify/cors é só GET, HEAD e POST. Sem esta linha o
+    // navegador barra toda edição e exclusão do painel na verificação prévia,
+    // e o erro aparece no console de quem usa, não no log daqui.
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'],
   })
 
   await app.register(jwt, {
