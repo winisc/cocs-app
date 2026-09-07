@@ -33,14 +33,26 @@ export async function buildApp() {
     timeWindow: '1 minute',
   })
 
-  app.get('/api/health', async () => ({
+  // A raiz existe para quem abre api.cocs.com.br no navegador e precisa saber
+  // que chegou no lugar certo. Nada de ambiente ou versao aqui: e publica, e
+  // detalhe de infraestrutura nao ajuda quem esta perdido nem quem esta
+  // procurando brecha.
+  app.get('/', async () => ({
+    nome: 'COCS API',
+    descricao: 'API do painel da COCS Odontologia',
+    saude: '/health',
+  }))
+
+  app.get('/health', async () => ({
     ok: true,
     name: 'cocs-server',
   }))
 
-  await app.register(usuariosModule, { prefix: '/api' })
-  await app.register(pacientesModule, { prefix: '/api/pacientes' })
-  await app.register(anamneseModule, { prefix: '/api/anamneses' })
+  // Sem prefixo `/api`: quem diz que isto e a API e o dominio, api.cocs.com.br.
+  // Repetir a palavra no caminho so alonga a URL sem separar nada.
+  await app.register(usuariosModule)
+  await app.register(pacientesModule, { prefix: '/pacientes' })
+  await app.register(anamneseModule, { prefix: '/anamneses' })
 
   return app
 }

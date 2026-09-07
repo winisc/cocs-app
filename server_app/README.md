@@ -89,8 +89,8 @@ recepcao@cocs.com.br / recepcao123
 
 ## Fluxo de cadastro
 
-`POST /api/auth/register` cria uma solicitacao de acesso. Ele nao cria sessao
-nem devolve JWT. Um administrador aprova em `POST /api/usuarios/solicitacoes/:id/aprovar`
+`POST /auth/register` cria uma solicitacao de acesso. Ele nao cria sessao
+nem devolve JWT. Um administrador aprova em `POST /usuarios/solicitacoes/:id/aprovar`
 e, depois disso, a pessoa consegue entrar pelo login.
 
 ## Permissoes
@@ -101,18 +101,18 @@ e, depois disso, a pessoa consegue entrar pelo login.
 
 ## Rotas principais
 
-- `GET /api/health`
-- `POST /api/auth/login`
-- `GET /api/auth/me`
-- `GET /api/usuarios`
-- `POST /api/usuarios`
-- `GET /api/pacientes`
-- `POST /api/pacientes`
-- `GET /api/pacientes/:id`
-- `PUT /api/pacientes/:id`
-- `DELETE /api/pacientes/:id`
-- `GET /api/anamneses`
-- `POST /api/anamneses`
-- `GET /api/anamneses/paciente/:pacienteId`
-- `GET /api/anamneses/publica/:token`
-- `POST /api/anamneses/publica/:token/respostas`
+- `GET /health`
+- `POST /auth/login`
+- `GET /auth/me`
+- `GET /usuarios`
+- `POST /usuarios`
+- `GET /pacientes`
+- `POST /pacientes`
+- `GET /pacientes/:id`
+- `PUT /pacientes/:id`
+- `DELETE /pacientes/:id`
+- `GET /anamneses`
+- `POST /anamneses`
+- `GET /anamneses/paciente/:pacienteId`
+- `GET /anamneses/publica/:token`
+- `POST /anamneses/publica/:token/respostas`
