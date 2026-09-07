@@ -112,3 +112,18 @@ function stringField(body: Body, field: string, max = 200) {
   if (trimmed.length > max) throw badRequest(`Campo ${field} excede ${max} caracteres.`)
   return trimmed
 }
+
+export type RedefinirSenhaDto = {
+  senha: string
+}
+
+export function parseRedefinirSenhaDto(body: unknown): RedefinirSenhaDto {
+  const data = asBody(body)
+  const senha = stringField(data, 'senha', MAX_SENHA)
+
+  if (senha.length < MIN_SENHA) {
+    throw badRequest(`A senha deve ter pelo menos ${MIN_SENHA} caracteres.`)
+  }
+
+  return { senha }
+}

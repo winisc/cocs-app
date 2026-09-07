@@ -176,7 +176,7 @@ export default function Register() {
   )
 }
 
-function Dica({ erro = false, children }) {
+export function Dica({ erro = false, children }) {
   return (
     <p
       // Mensagem de erro é anunciada; texto de apoio não, senão o leitor de

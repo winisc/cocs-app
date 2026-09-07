@@ -90,3 +90,4 @@ export const IconeRecusar = svg(
  * SVG transcrito à mão não dá erro, só desenha torto.
  */
 export { ClipboardDocumentListIcon as IconeAnamnese } from '@heroicons/react/24/solid'
+export { KeyIcon as IconeSenha } from '@heroicons/react/24/solid'

@@ -3,11 +3,12 @@ import { useSession } from '../../lib/session'
 import { PAPEIS, atualizarUsuario, excluirUsuario, rotuloDoPapel } from '../../lib/usuarios'
 import Dialogo, { AcoesDoDialogo, useUltimo } from '../../components/painel/Dialogo'
 import Botao from '../../components/painel/Botao'
-import BotaoIcone, { IconeEditar, IconeExcluir } from '../../components/painel/BotaoIcone'
+import BotaoIcone, { IconeEditar, IconeExcluir, IconeSenha } from '../../components/painel/BotaoIcone'
 import Tabela, { Acoes, Celula, Etiqueta, Pessoa } from '../../components/painel/Tabela'
 import Select from '../../components/painel/Select'
 import Field from '../../components/Field'
 import { Vazio, useUsuarios } from './Secao'
+import DialogoDeRedefinicao from '../../components/painel/DialogoDeRedefinicao'
 import { useTitulo } from '../../lib/titulo'
 
 export default function ListaDeUsuarios() {
@@ -18,6 +19,7 @@ export default function ListaDeUsuarios() {
 
   const [editando, setEditando] = useState(null)
   const [excluindo, setExcluindo] = useState(null)
+  const [redefinindo, setRedefinindo] = useState(null)
 
   if (usuarios.length === 0) {
     return (
@@ -55,6 +57,13 @@ export default function ListaDeUsuarios() {
 
               <Celula direita>
                 <Acoes>
+                  <BotaoIcone
+                    rotulo={`Redefinir a senha de ${u.nome}`}
+                    onClick={() => setRedefinindo(u)}
+                  >
+                    <IconeSenha />
+                  </BotaoIcone>
+
                   <BotaoIcone rotulo={`Editar ${u.nome}`} onClick={() => setEditando(u)}>
                     <IconeEditar />
                   </BotaoIcone>
@@ -82,6 +91,8 @@ export default function ListaDeUsuarios() {
         aoFechar={() => setEditando(null)}
         aoSalvar={recarregar}
       />
+
+      <DialogoDeRedefinicao usuario={redefinindo} aoFechar={() => setRedefinindo(null)} />
 
       <DialogoDeExclusao
         usuario={excluindo}

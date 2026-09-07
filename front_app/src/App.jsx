@@ -17,6 +17,7 @@ import AnamneseAtualDoPaciente from './pages/anamnese/AtualDoPaciente'
 import { primeiraDoUsuario } from './components/painel/navegacao'
 import NaoEncontrada from './pages/NaoEncontrada'
 import AnamnesePublica from './pages/publico/Anamnese'
+import RedefinirSenha from './pages/publico/RedefinirSenha'
 
 /**
  * O painel inteiro fica atrás da guarda; login e cadastro ficam de fora.
@@ -30,6 +31,10 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/anamnese/:token" element={<AnamnesePublica />} />
+
+        {/* Fora da guarda: quem abre este link é justamente quem não consegue
+            entrar. O token é a credencial, e vale uma hora. */}
+        <Route path="/redefinir-senha/:token" element={<RedefinirSenha />} />
 
         <Route element={<RotasComSessao />}>
           <Route path="/login" element={<Login />} />

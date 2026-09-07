@@ -81,6 +81,7 @@ export default function Login() {
           autoComplete="current-password"
           disabled={enviando}
           invalid={Boolean(erro)}
+          placeholder="Senha"
           acao={<BotaoVerSenha ativo={verSenha} aoAlternar={() => setVerSenha((v) => !v)} />}
         />
 

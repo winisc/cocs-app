@@ -30,3 +30,24 @@ export type SolicitacaoDeAcessoPublica = Omit<SolicitacaoDeAcesso, 'senhaHash'>
 export type SolicitacaoDeAcessoRecebida = {
   mensagem: string
 }
+
+export type RedefinicaoDeSenha = {
+  id: string
+  usuarioId: string
+  usuarioNome: string
+  usuarioEmail: string
+  expiraEm: string
+  usadaEm: string | null
+}
+
+/** O que o painel recebe ao gerar um link. O token aparece uma vez só. */
+export type RedefinicaoCriada = {
+  token: string
+  expiraEm: string
+}
+
+/** O que a página pública sabe antes de a pessoa digitar a senha nova. */
+export type RedefinicaoAberta = {
+  nome: string
+  expiraEm: string
+}
