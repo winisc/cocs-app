@@ -48,6 +48,12 @@ create index if not exists idx_anamneses_paciente_criada
 create index if not exists idx_anamneses_status_criada
   on anamneses (status, criada_em desc);
 
+-- Um administrador, e só. É o suficiente para entrar no painel e cadastrar o
+-- resto: os outros usuários nascem pelo fluxo de solicitação de acesso, e
+-- paciente e anamnese são dados de clínica, não de migration.
+--
+-- A senha é `admin123`. Troque no primeiro acesso: este hash está no
+-- repositório, então quem lê o código sabe a senha.
 insert into usuarios (id, nome, email, email_normalizado, role, ativo, criado_em, senha_hash)
 values
   (
@@ -57,74 +63,8 @@ values
     'admin@cocs.com.br',
     'admin',
     true,
-    '2026-08-20T12:00:00.000Z',
+    now(),
     '$2b$10$1yOMCCvTNQT3m9HUJanRHeIOLZ5nP528fTv1xVsUlLLgg2kaBqTKm'
-  ),
-  (
-    'u_recepcao',
-    'Recepcao COCS',
-    'recepcao@cocs.com.br',
-    'recepcao@cocs.com.br',
-    'recepcao',
-    true,
-    '2026-08-20T12:00:00.000Z',
-    '$2b$10$MkMl18/d/W2bnB.ZHGzAke6U83..u5RTqu3Tq1uIeYOgyWIaGLYhe'
-  )
-on conflict (id) do nothing;
-
-insert into pacientes (id, nome, sobrenome, nome_busca, sobrenome_busca, criado_em, atualizado_em)
-values
-  ('p1', 'Joana', 'Ribeiro', 'joana', 'ribeiro', '2026-08-20T12:00:00.000Z', '2026-08-20T12:00:00.000Z'),
-  ('p2', 'Tiago', 'Mendes', 'tiago', 'mendes', '2026-08-20T12:00:00.000Z', '2026-08-20T12:00:00.000Z'),
-  ('p3', 'Lucia', 'Fernandes', 'lucia', 'fernandes', '2026-08-20T12:00:00.000Z', '2026-08-20T12:00:00.000Z'),
-  ('p4', 'Bruno', 'Carvalho', 'bruno', 'carvalho', '2026-08-20T12:00:00.000Z', '2026-08-20T12:00:00.000Z')
-on conflict (id) do nothing;
-
-insert into anamneses (
-  id,
-  paciente_id,
-  status,
-  token,
-  criada_em,
-  respondida_em,
-  criada_por,
-  respostas
-)
-values
-  (
-    'a1',
-    'p1',
-    'concluida',
-    'tok-a1',
-    '2026-08-20T12:00:00.000Z',
-    '2026-08-21T12:00:00.000Z',
-    'Admin COCS',
-    '[
-      {"id":"nome","pergunta":"Nome e sobrenome","resposta":"Joana Ribeiro"},
-      {"id":"apelido","pergunta":"Como você gosta de ser chamado?","resposta":"Jô"},
-      {"id":"musica","pergunta":"Qual música ou vídeo musical você gosta de ouvir?","resposta":"MPB tranquila"},
-      {"id":"bebida","pergunta":"O que você gostaria que servíssemos aqui na clínica?","resposta":"Água · Sem gás"}
-    ]'::jsonb
-  ),
-  (
-    'a2',
-    'p3',
-    'pendente',
-    'tok-a2',
-    '2026-08-28T12:00:00.000Z',
-    null,
-    'Recepcao COCS',
-    '[]'::jsonb
-  ),
-  (
-    'a3',
-    'p4',
-    'pendente',
-    'tok-a3',
-    '2026-08-05T12:00:00.000Z',
-    null,
-    'Recepcao COCS',
-    '[]'::jsonb
   )
 on conflict (id) do nothing;
 
