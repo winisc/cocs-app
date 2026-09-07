@@ -1,0 +1,240 @@
+@import 'tailwindcss';
+
+/* ------------------------------------------------------------------ */
+/* Design tokens — COCS Odontologia                                    */
+/*                                                                     */
+/* Copiados da landing de propósito, não importados. Os dois projetos  */
+/* são isolados: nenhum instala o que o outro instala. Se a marca      */
+/* mudar, muda nos dois lugares — o custo de duplicar é menor que o de */
+/* acoplar dois aplicativos com ciclos de vida diferentes.             */
+/* ------------------------------------------------------------------ */
+@theme {
+  --color-navy-50: #f5f6f8;
+  --color-navy-100: #e8eaee;
+  --color-navy-200: #ccd1da;
+  --color-navy-300: #a4adbd;
+  --color-navy-400: #75819a;
+  --color-navy-500: #56627c;
+  --color-navy-600: #434d63;
+  --color-navy-700: #373f52;
+  --color-navy-800: #2f3644;
+  --color-navy-900: #28303d;
+  --color-navy-950: #1b212b;
+
+  --color-mint-50: #f2faf1;
+  --color-mint-100: #e1f4e0;
+  --color-mint-200: #c6e8c4;
+  --color-mint-300: #aed0ac;
+  --color-mint-400: #8ed18b;
+  --color-mint-500: #6cc168;
+  --color-mint-600: #52a54e;
+  --color-mint-700: #42853f;
+  --color-mint-800: #386a36;
+  --color-mint-900: #30582f;
+
+  --font-display: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-navy-50 font-sans text-navy-800 antialiased;
+  }
+
+  /* Ferramenta de trabalho, usada no teclado o dia inteiro: o foco precisa
+     ser visível em tudo que recebe foco, não só nos botões. */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-mint-600;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Entrada e saída dos diálogos                                        */
+/*                                                                     */
+/* Animar a saída de um <dialog> exige `allow-discrete`: sem isso o    */
+/* navegador troca `display` de uma vez e a caixa some antes da        */
+/* transição rodar. `overlay` entra junto porque é a propriedade que   */
+/* controla a permanência na top layer — sem ela, o elemento cai da    */
+/* camada no primeiro quadro e a saída pisca.                          */
+/*                                                                     */
+/* `@starting-style` é o estado do primeiro quadro. Sem ele não existe */
+/* "de onde" partir, e a entrada aparece pronta.                       */
+/* ------------------------------------------------------------------ */
+@layer components {
+  dialog {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+    transition:
+      opacity 160ms ease,
+      transform 160ms ease,
+      display 160ms allow-discrete,
+      overlay 160ms allow-discrete;
+  }
+
+  dialog[open] {
+    opacity: 1;
+    transform: none;
+  }
+
+  @starting-style {
+    dialog[open] {
+      opacity: 0;
+      transform: translateY(8px) scale(0.97);
+    }
+  }
+
+  dialog::backdrop {
+    opacity: 0;
+    transition:
+      opacity 160ms ease,
+      display 160ms allow-discrete,
+      overlay 160ms allow-discrete;
+  }
+
+  dialog[open]::backdrop {
+    opacity: 1;
+  }
+
+  @starting-style {
+    dialog[open]::backdrop {
+      opacity: 0;
+    }
+  }
+
+  /* Quem pediu menos movimento recebe menos movimento. O fade curto fica:
+     sem transição nenhuma, a caixa aparece de estalo e é pior de acompanhar
+     do que um clarão de 80ms. */
+  @media (prefers-reduced-motion: reduce) {
+    dialog,
+    dialog::backdrop {
+      transition-duration: 80ms;
+    }
+
+    dialog {
+      transform: none;
+    }
+
+    @starting-style {
+      dialog[open] {
+        transform: none;
+      }
+    }
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Blocos que abrem e fecham                                           */
+/*                                                                     */
+/* O "qual?" do sim/não e as sub-opções de bebida. Altura automática    */
+/* não se anima, então o componente mede o conteúdo e entrega a altura */
+/* final em `--altura-expansivel`. O wrapper interno contém as margens */
+/* dos filhos, para a medida incluir também o respiro entre os blocos. */
+/*                                                                     */
+/* Fechado continua no DOM, para poder animar a saída, mas leva        */
+/* `inert` no JSX: sem isso o teclado ainda entraria num campo que a   */
+/* pessoa não está vendo.                                              */
+/* ------------------------------------------------------------------ */
+@layer components {
+  .expansivel {
+    height: var(--altura-expansivel, 0);
+    overflow: hidden;
+    opacity: 0;
+    transition:
+      height 1200ms cubic-bezier(0.37, 0, 0.63, 1),
+      opacity 950ms cubic-bezier(0.37, 0, 0.63, 1);
+  }
+
+  .expansivel__conteudo {
+    display: flow-root;
+    transform: translateY(-0.75rem);
+    transform-origin: top;
+    transition: transform 1200ms cubic-bezier(0.37, 0, 0.63, 1);
+  }
+
+  /* Sem tempo próprio: abrir e fechar são o mesmo movimento ao contrário.
+     Antes o conteúdo sumia em 140ms enquanto a caixa levava 380ms para
+     encolher, e sobrava uma caixa vazia se fechando sozinha — era isso que
+     se via como duas velocidades. De quebra, a regra de menos movimento
+     volta a valer nos dois sentidos: como estava, a especificidade daqui
+     ganhava dela na abertura. */
+  .expansivel[data-aberto='true'] {
+    opacity: 1;
+  }
+
+  .expansivel[data-estado='aberto'] {
+    overflow: visible;
+  }
+
+  .expansivel[data-aberto='true'] .expansivel__conteudo {
+    transform: translateY(0);
+  }
+
+  @media (min-width: 640px) {
+    .expansivel {
+      transition:
+        height 420ms cubic-bezier(0.37, 0, 0.63, 1),
+        opacity 280ms cubic-bezier(0.37, 0, 0.63, 1);
+    }
+
+    .expansivel__conteudo {
+      transform: none;
+      transition: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .expansivel,
+    .expansivel__conteudo {
+      transition-duration: 220ms;
+    }
+  }
+}
+
+@layer components {
+  .anamnese-atualizada {
+    animation: realce-anamnese 1600ms ease-out;
+  }
+
+  .anamnese-conteudo-entrada {
+    animation: entrada-conteudo-anamnese 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes realce-anamnese {
+    0% {
+      background-color: rgb(242 250 241 / 0.95);
+      box-shadow: 0 0 0 1px rgb(108 193 104 / 0.28);
+    }
+
+    100% {
+      background-color: transparent;
+      box-shadow: none;
+    }
+  }
+
+  @keyframes entrada-conteudo-anamnese {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .anamnese-atualizada,
+    .anamnese-conteudo-entrada {
+      animation-duration: 120ms;
+    }
+
+    .anamnese-conteudo-entrada {
+      transform: none;
+    }
+  }
+}

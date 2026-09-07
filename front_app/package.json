@@ -1,0 +1,28 @@
+{
+  "name": "cocs-front",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Painel interno da COCS — área da clínica, atrás de login",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource/poppins": "^5.3.0",
+    "@heroicons/react": "^2.2.0",
+    "cocs": "file:..",
+    "qrcode": "^1.5.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.18.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "tailwindcss": "^4.1.0",
+    "vite": "^7.0.0"
+  }
+}

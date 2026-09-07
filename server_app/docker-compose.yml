@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cocs-pg
+    environment:
+      POSTGRES_USER: cocs
+      POSTGRES_PASSWORD: cocs
+      POSTGRES_DB: cocs
+    ports:
+      - "5432:5432"
+    volumes:
+      - cocs_postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cocs -d cocs"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  cocs_postgres_data:
+    name: cocs_postgres_data

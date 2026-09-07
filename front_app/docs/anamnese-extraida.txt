@@ -1,0 +1,35 @@
+ANAMNESE SOCIAL
+Nome completo:
+1 - Como você gosta de ser chamado?
+______________________________________________________________________________
+2- Qual música ou vídeo musical você gosta de assistir/ouvir?
+______________________________________________________________________________
+3 - Tem algum hobby? Qual?
+( ) sim
+________________________________
+( ) Não
+4 – Qual seu time de futebol? Qual?
+( ) Tenho
+______________________________________________
+( ) Não tenho
+5- O que gostaria que servíssemos a você aqui na Clínica?
+( ) ÁGUA
+( ) Água SEM gás
+( ) Água COM gás
+( )CHÁ
+( ) Chá quente
+( ) Chá gelado
+( )CAFÉ
+( ) Café com açúcar
+( ) Café DESCAFEINADO com açúcar
+( ) Café sem açúcar
+( ) Café DESCAFEINADO sem açúcar
+( ) CAPPUCCINO
+( ) Cappuccino COM açúcar
+( ) Capuccino SEM açúcar
+( ) REFRIGERANTE
+( ) Coca- cola
+( ) Coca-cola ZERO
+( ) CERVEJA
+( ) Corona
+( ) Heineken

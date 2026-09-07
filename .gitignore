@@ -1,0 +1,13 @@
+# Cada projeto tem o seu; este é a rede de segurança do repositório inteiro.
+node_modules/
+dist/
+
+.env
+.env.*
+!.env.example
+
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+npm-debug.log*

@@ -1,0 +1,6 @@
+# Aplicação de página única: as rotas existem só no navegador.
+#
+# Sem esta regra, recarregar em /cadastro pede esse arquivo ao servidor, que
+# não existe, e devolve 404. O status 200 é o que diferencia de um redirecionamento:
+# a URL continua /cadastro e o roteador assume dali.
+/*  /index.html  200
