@@ -261,6 +261,19 @@ function medirAltura(elemento) {
  * sete opções curtas e só abre o que interessa.
  */
 function Escolha({ pergunta, resposta, aoResponder, erro }) {
+  return pergunta.multipla ? (
+    <EscolhaMultipla
+      pergunta={pergunta}
+      resposta={resposta}
+      aoResponder={aoResponder}
+      erro={erro}
+    />
+  ) : (
+    <EscolhaUnica pergunta={pergunta} resposta={resposta} aoResponder={aoResponder} erro={erro} />
+  )
+}
+
+function EscolhaUnica({ pergunta, resposta, aoResponder, erro }) {
   const escolheuCategoria = Boolean(grupoDe(pergunta, resposta))
 
   return (
@@ -299,13 +312,164 @@ function Escolha({ pergunta, resposta, aoResponder, erro }) {
 }
 
 /**
+ * Escolha de várias, ainda em dois níveis.
+ *
+ * A categoria deixa de ser resposta e vira só uma gaveta: abrir não marca
+ * nada. Sem isso, tocar em "Café" para ver as opções já contaria como pedido
+ * de café, e a pessoa sairia com bebida que não escolheu.
+ *
+ * Abrir é estado de tela, não de resposta — por isso mora aqui e não sobe
+ * para o formulário. O que a gente devolve é só a lista do que foi marcado.
+ */
+function EscolhaMultipla({ pergunta, resposta, aoResponder, erro }) {
+  const valores = resposta?.valores ?? []
+
+  // Nasce com as gavetas que já têm escolha abertas: voltar para a pergunta e
+  // não ver o que marcou é o mesmo que ter perdido.
+  const [abertos, setAbertos] = useState(
+    () => new Set(pergunta.grupos.filter((g) => temEscolha(g, valores)).map((g) => g.id)),
+  )
+
+  function alternar(grupo, id) {
+    const marcado = valores.includes(id)
+
+    if (marcado) {
+      aoResponder({ valores: valores.filter((v) => v !== id) })
+      return
+    }
+
+    // Exclusivo apaga o resto; qualquer bebida apaga o exclusivo.
+    const exclusivos = new Set(pergunta.grupos.filter((g) => g.exclusivo).map((g) => g.id))
+    const base = grupo.exclusivo ? [] : valores.filter((v) => !exclusivos.has(v))
+
+    aoResponder({ valores: [...base, id] })
+    if (grupo.exclusivo) setAbertos(new Set())
+  }
+
+  return (
+    <div className="flex flex-col gap-2.5">
+      {pergunta.grupos.map((grupo) => {
+        // Categoria sem sub-opções é escolha por si só, não gaveta.
+        if (!grupo.opcoes.length) {
+          return (
+            <Opcao
+              key={grupo.id}
+              multipla
+              nome={`${pergunta.id}-${grupo.id}`}
+              marcada={valores.includes(grupo.id)}
+              erro={erro}
+              aoMarcar={() => alternar(grupo, grupo.id)}
+            >
+              {grupo.titulo}
+            </Opcao>
+          )
+        }
+
+        const aberto = abertos.has(grupo.id)
+        const escolhidas = grupo.opcoes.filter((o) => valores.includes(o.id)).length
+
+        return (
+          <div key={grupo.id}>
+            <Gaveta
+              aberta={aberto}
+              escolhidas={escolhidas}
+              erro={erro}
+              aoAlternar={() =>
+                setAbertos((atuais) => {
+                  const proximos = new Set(atuais)
+                  if (proximos.has(grupo.id)) proximos.delete(grupo.id)
+                  else proximos.add(grupo.id)
+                  return proximos
+                })
+              }
+            >
+              {grupo.titulo}
+            </Gaveta>
+
+            <SubOpcoes
+              aberto={aberto}
+              multipla
+              pergunta={pergunta}
+              grupo={grupo}
+              marcadas={valores}
+              aoAlternar={(id) => alternar(grupo, id)}
+              erro={erro}
+            />
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function temEscolha(grupo, valores) {
+  if (!grupo.opcoes.length) return valores.includes(grupo.id)
+  return grupo.opcoes.some((o) => valores.includes(o.id))
+}
+
+/**
+ * O cabeçalho de uma categoria na escolha múltipla.
+ *
+ * Botão, e não caixa de marcar: abrir e escolher são coisas diferentes, e usar
+ * o mesmo controle para as duas é o que faria "vi o que tem em Café" virar
+ * "quero café".
+ */
+function Gaveta({ aberta, escolhidas, erro, aoAlternar, children }) {
+  const temEscolhas = escolhidas > 0
+
+  return (
+    <button
+      type="button"
+      onClick={aoAlternar}
+      aria-expanded={aberta}
+      className={`flex w-full cursor-pointer items-center gap-3 rounded-lg border px-4 py-2.5 text-left text-base transition-colors ${
+        temEscolhas
+          ? 'border-mint-500 bg-mint-50 text-navy-900'
+          : `bg-white text-navy-700 hover:border-navy-300 ${erro ? 'border-red-300' : 'border-navy-200'}`
+      }`}
+    >
+      <span className="flex-1">{children}</span>
+
+      {temEscolhas && (
+        <span className="rounded-full bg-mint-600 px-2 py-0.5 font-display text-xs font-semibold text-white">
+          {escolhidas}
+        </span>
+      )}
+
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={`h-4 w-4 shrink-0 text-navy-400 transition-transform duration-200 ${aberta ? 'rotate-180' : ''}`}
+      >
+        <path d="M5 7.5 10 12.5 15 7.5" />
+      </svg>
+    </button>
+  )
+}
+
+/**
  * As opções de dentro de uma categoria.
  *
  * Aparecem coladas na categoria escolhida, não no fim da lista: é onde o olho
  * já está. E rolam para dentro da tela ao abrir, porque a categoria pode estar
  * na última linha visível e as opções nasceriam abaixo da dobra.
  */
-function SubOpcoes({ aberto, pergunta, grupo, resposta, aoResponder, erro }) {
+function SubOpcoes({
+  aberto,
+  multipla,
+  pergunta,
+  grupo,
+  resposta,
+  marcadas,
+  aoResponder,
+  aoAlternar,
+  erro,
+}) {
   const caixa = useRef(null)
   const id = useId()
 
@@ -328,17 +492,26 @@ function SubOpcoes({ aberto, pergunta, grupo, resposta, aoResponder, erro }) {
     <Expansivel aberto={aberto}>
       <div ref={caixa} className="mt-2.5 rounded-xl border border-mint-200 bg-mint-50/60 p-3.5">
         <p id={id} className="font-display text-sm font-medium text-navy-700">
-          Qual {grupo.titulo.toLowerCase()}?
+          {multipla
+            ? `Quais de ${grupo.titulo.toLowerCase()}?`
+            : `Qual ${grupo.titulo.toLowerCase()}?`}
         </p>
 
-        <div role="radiogroup" aria-labelledby={id} className="mt-2 flex flex-col gap-2.5">
+        <div
+          role={multipla ? 'group' : 'radiogroup'}
+          aria-labelledby={id}
+          className="mt-2 flex flex-col gap-2.5"
+        >
           {grupo.opcoes.map((opcao) => (
             <Opcao
               key={opcao.id}
-              nome={`${pergunta.id}-opcao`}
-              marcada={resposta?.valor === opcao.id}
+              multipla={multipla}
+              // Na múltipla cada caixa é independente: agrupar por `name` faria
+              // o navegador tratá-las como rádio e desmarcar a anterior.
+              nome={multipla ? `${pergunta.id}-${opcao.id}` : `${pergunta.id}-opcao`}
+              marcada={multipla ? marcadas.includes(opcao.id) : resposta?.valor === opcao.id}
               erro={erro}
-              aoMarcar={() => aoResponder({ valor: opcao.id })}
+              aoMarcar={() => (multipla ? aoAlternar(opcao.id) : aoResponder({ valor: opcao.id }))}
             >
               {opcao.rotulo}
             </Opcao>
@@ -357,7 +530,7 @@ function SubOpcoes({ aberto, pergunta, grupo, resposta, aoResponder, erro }) {
  * de tela. A caixa inteira é o alvo — no celular, mirar num círculo de 16px é
  * o que faz a pessoa errar e desistir.
  */
-function Opcao({ nome, marcada, aoMarcar, erro, children }) {
+function Opcao({ nome, marcada, aoMarcar, erro, multipla = false, children }) {
   return (
     <label
       className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-2.5 text-base transition-colors ${
@@ -367,7 +540,7 @@ function Opcao({ nome, marcada, aoMarcar, erro, children }) {
       }`}
     >
       <input
-        type="radio"
+        type={multipla ? 'checkbox' : 'radio'}
         name={nome}
         checked={marcada}
         onChange={aoMarcar}
@@ -375,13 +548,30 @@ function Opcao({ nome, marcada, aoMarcar, erro, children }) {
         className="sr-only"
       />
 
+      {/* Quadrado para marcar várias, círculo para escolher uma. A forma é o
+          que diz, antes de tocar, se marcar a segunda apaga a primeira. */}
       <span
         aria-hidden="true"
-        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-          marcada ? 'border-mint-600' : 'border-navy-300'
-        }`}
+        className={`flex h-5 w-5 shrink-0 items-center justify-center border-2 transition-colors ${
+          multipla ? 'rounded-md' : 'rounded-full'
+        } ${marcada ? 'border-mint-600 ' + (multipla ? 'bg-mint-600' : '') : 'border-navy-300'}`}
       >
-        {marcada && <span className="h-2.5 w-2.5 rounded-full bg-mint-600" />}
+        {marcada &&
+          (multipla ? (
+            <svg
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="white"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-3 w-3"
+            >
+              <path d="M3.5 8.5 6.5 11.5 12.5 5" />
+            </svg>
+          ) : (
+            <span className="h-2.5 w-2.5 rounded-full bg-mint-600" />
+          ))}
       </span>
 
       {children}

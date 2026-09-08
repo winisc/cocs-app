@@ -47,7 +47,6 @@ export const PERGUNTAS = [
     id: 'musica',
     tipo: 'texto',
     rotulo: 'Qual música ou vídeo musical você gosta de ouvir?',
-    ajuda: 'A gente coloca durante o atendimento, se você quiser.',
     placeholder: 'Artista, estilo, playlist…',
   },
   {
@@ -73,8 +72,11 @@ export const PERGUNTAS = [
   {
     id: 'bebida',
     tipo: 'escolha',
+    // Pode marcar mais de uma: quem toma café também bebe água, e obrigar a
+    // escolher uma só fazia a recepção descobrir o resto na hora de servir.
+    multipla: true,
     rotulo: 'O que você gostaria que servíssemos aqui na clínica?',
-    ajuda: 'Escolha uma. A gente já deixa separado para o seu horário.',
+    ajuda: 'Pode marcar mais de uma. A gente já deixa separado para o seu horário.',
     // Dois níveis: primeiro a categoria, depois qual. O papel mostrava as
     // dezessete opções de uma vez; no celular isso é uma parede que se rola.
     // Um grupo sem opções é escolha completa por si só.
@@ -129,7 +131,9 @@ export const PERGUNTAS = [
           { id: 'heineken', rotulo: 'Heineken' },
         ],
       },
-      { id: 'nada', titulo: 'Prefiro não beber nada', opcoes: [] },
+      // Único que não soma com os outros: "nada" e "café" ao mesmo tempo não
+      // querem dizer coisa nenhuma.
+      { id: 'nada', titulo: 'Prefiro não beber nada', opcoes: [], exclusivo: true },
     ],
   },
 ]
@@ -159,6 +163,10 @@ export function validar(pergunta, resposta) {
   }
 
   if (pergunta.tipo === 'escolha') {
+    if (pergunta.multipla) {
+      return resposta?.valores?.length ? null : 'Escolha ao menos uma opção.'
+    }
+
     const grupo = grupoDe(pergunta, resposta)
     if (!grupo) return 'Escolha uma opção.'
     // Categoria sem sub-opções já é a resposta inteira.
@@ -176,6 +184,31 @@ export function grupoDe(pergunta, resposta) {
   return pergunta.grupos?.find((g) => g.id === resposta?.grupo) ?? null
 }
 
+/**
+ * O que foi marcado numa pergunta de múltipla escolha, na ordem do
+ * questionário — e não na ordem em que a pessoa foi clicando, que muda a
+ * resposta de lugar sem mudar o conteúdo.
+ */
+export function escolhasDe(pergunta, resposta) {
+  const marcados = new Set(resposta?.valores ?? [])
+  const escolhidas = []
+
+  for (const grupo of pergunta.grupos ?? []) {
+    if (!grupo.opcoes.length) {
+      if (marcados.has(grupo.id)) escolhidas.push({ id: grupo.id, texto: grupo.titulo })
+      continue
+    }
+
+    for (const opcao of grupo.opcoes) {
+      if (marcados.has(opcao.id)) {
+        escolhidas.push({ id: opcao.id, texto: `${grupo.titulo} · ${opcao.rotulo}` })
+      }
+    }
+  }
+
+  return escolhidas
+}
+
 /** Todas as opções de uma pergunta, sem separar por grupo. */
 export function opcoesDe(pergunta) {
   return pergunta.grupos?.flatMap((g) => g.opcoes) ?? pergunta.opcoes ?? []
@@ -183,6 +216,13 @@ export function opcoesDe(pergunta) {
 
 /** O texto de uma resposta, para mostrar na revisão e no painel. */
 export function respostaEmTexto(pergunta, resposta) {
+  if (pergunta.tipo === 'escolha' && pergunta.multipla) {
+    const escolhidas = escolhasDe(pergunta, resposta)
+    // Uma por linha: a ficha do paciente respeita a quebra, e três bebidas
+    // separadas por vírgula viram um borrão para quem lê antes de atender.
+    return escolhidas.length ? escolhidas.map((e) => e.texto).join('\n') : null
+  }
+
   if (pergunta.tipo === 'escolha') {
     const grupo = grupoDe(pergunta, resposta)
     if (!grupo) return null
