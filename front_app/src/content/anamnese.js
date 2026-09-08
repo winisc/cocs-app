@@ -76,7 +76,7 @@ export const PERGUNTAS = [
     // escolher uma só fazia a recepção descobrir o resto na hora de servir.
     multipla: true,
     rotulo: 'O que você gostaria que servíssemos aqui na clínica?',
-    ajuda: 'Pode marcar mais de uma. A gente já deixa separado para o seu horário.',
+    ajuda: 'Você pode selecionar marcar mais de uma opção.',
     // Dois níveis: primeiro a categoria, depois qual. O papel mostrava as
     // dezessete opções de uma vez; no celular isso é uma parede que se rola.
     // Um grupo sem opções é escolha completa por si só.
