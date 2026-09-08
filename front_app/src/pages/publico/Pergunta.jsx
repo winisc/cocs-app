@@ -324,26 +324,30 @@ function EscolhaUnica({ pergunta, resposta, aoResponder, erro }) {
 function EscolhaMultipla({ pergunta, resposta, aoResponder, erro }) {
   const valores = resposta?.valores ?? []
 
-  // Nasce com as gavetas que já têm escolha abertas: voltar para a pergunta e
-  // não ver o que marcou é o mesmo que ter perdido.
-  const [abertos, setAbertos] = useState(
-    () => new Set(pergunta.grupos.filter((g) => temEscolha(g, valores)).map((g) => g.id)),
+  // Uma gaveta por vez. Com todas abertas a lista virava uma parede de vinte
+  // itens, e a categoria seguinte nascia longe da que a pessoa acabou de
+  // fechar. O que já foi marcado não se perde ao fechar: o contador no
+  // cabeçalho continua mostrando.
+  const [aberto, setAberto] = useState(
+    () => pergunta.grupos.find((g) => temEscolha(g, valores))?.id ?? null,
   )
 
   function alternar(grupo, id) {
-    const marcado = valores.includes(id)
-
-    if (marcado) {
+    // Tocar no que já está marcado desmarca. É como se desiste de uma
+    // categoria inteira sem ter um botão só para isso.
+    if (valores.includes(id)) {
       aoResponder({ valores: valores.filter((v) => v !== id) })
       return
     }
 
-    // Exclusivo apaga o resto; qualquer bebida apaga o exclusivo.
     const exclusivos = new Set(pergunta.grupos.filter((g) => g.exclusivo).map((g) => g.id))
-    const base = grupo.exclusivo ? [] : valores.filter((v) => !exclusivos.has(v))
+    // Uma por categoria: escolher outro café troca o café, não soma. E o
+    // exclusivo apaga tudo, como qualquer bebida apaga o exclusivo.
+    const irmas = new Set(grupo.opcoes.map((o) => o.id))
+    const base = grupo.exclusivo ? [] : valores.filter((v) => !exclusivos.has(v) && !irmas.has(v))
 
     aoResponder({ valores: [...base, id] })
-    if (grupo.exclusivo) setAbertos(new Set())
+    if (grupo.exclusivo) setAberto(null)
   }
 
   return (
@@ -365,29 +369,22 @@ function EscolhaMultipla({ pergunta, resposta, aoResponder, erro }) {
           )
         }
 
-        const aberto = abertos.has(grupo.id)
+        const estaAberto = aberto === grupo.id
         const escolhidas = grupo.opcoes.filter((o) => valores.includes(o.id)).length
 
         return (
           <div key={grupo.id}>
             <Gaveta
-              aberta={aberto}
+              aberta={estaAberto}
               escolhidas={escolhidas}
               erro={erro}
-              aoAlternar={() =>
-                setAbertos((atuais) => {
-                  const proximos = new Set(atuais)
-                  if (proximos.has(grupo.id)) proximos.delete(grupo.id)
-                  else proximos.add(grupo.id)
-                  return proximos
-                })
-              }
+              aoAlternar={() => setAberto(estaAberto ? null : grupo.id)}
             >
               {grupo.titulo}
             </Gaveta>
 
             <SubOpcoes
-              aberto={aberto}
+              aberto={estaAberto}
               multipla
               pergunta={pergunta}
               grupo={grupo}
@@ -492,24 +489,22 @@ function SubOpcoes({
     <Expansivel aberto={aberto}>
       <div ref={caixa} className="mt-2.5 rounded-xl border border-mint-200 bg-mint-50/60 p-3.5">
         <p id={id} className="font-display text-sm font-medium text-navy-700">
-          {multipla
-            ? `Quais de ${grupo.titulo.toLowerCase()}?`
-            : `Qual ${grupo.titulo.toLowerCase()}?`}
+          Qual {grupo.titulo.toLowerCase()}?
         </p>
 
-        <div
-          role={multipla ? 'group' : 'radiogroup'}
-          aria-labelledby={id}
-          className="mt-2 flex flex-col gap-2.5"
-        >
+        {/* Rádio nos dois modos: mesmo podendo marcar várias categorias, dentro
+            de uma vale só uma — dois cafés ao mesmo tempo não é pedido. */}
+        <div role="radiogroup" aria-labelledby={id} className="mt-2 flex flex-col gap-2.5">
           {grupo.opcoes.map((opcao) => (
             <Opcao
               key={opcao.id}
-              multipla={multipla}
-              // Na múltipla cada caixa é independente: agrupar por `name` faria
-              // o navegador tratá-las como rádio e desmarcar a anterior.
-              nome={multipla ? `${pergunta.id}-${opcao.id}` : `${pergunta.id}-opcao`}
+              // Agrupadas por categoria: é o `name` que faz o navegador trocar
+              // a irmã e andar entre elas com as setas.
+              nome={multipla ? `${pergunta.id}-${grupo.id}` : `${pergunta.id}-opcao`}
               marcada={multipla ? marcadas.includes(opcao.id) : resposta?.valor === opcao.id}
+              // Rádio marcado não dispara `change` ao ser clicado de novo, e
+              // sem isto não haveria como desistir da categoria.
+              podeDesmarcar={multipla}
               erro={erro}
               aoMarcar={() => (multipla ? aoAlternar(opcao.id) : aoResponder({ valor: opcao.id }))}
             >
@@ -530,7 +525,15 @@ function SubOpcoes({
  * de tela. A caixa inteira é o alvo — no celular, mirar num círculo de 16px é
  * o que faz a pessoa errar e desistir.
  */
-function Opcao({ nome, marcada, aoMarcar, erro, multipla = false, children }) {
+function Opcao({
+  nome,
+  marcada,
+  aoMarcar,
+  erro,
+  multipla = false,
+  podeDesmarcar = false,
+  children,
+}) {
   return (
     <label
       className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-2.5 text-base transition-colors ${
@@ -543,7 +546,8 @@ function Opcao({ nome, marcada, aoMarcar, erro, multipla = false, children }) {
         type={multipla ? 'checkbox' : 'radio'}
         name={nome}
         checked={marcada}
-        onChange={aoMarcar}
+        onChange={marcada && podeDesmarcar ? () => {} : aoMarcar}
+        onClick={marcada && podeDesmarcar ? aoMarcar : undefined}
         aria-describedby={erro}
         className="sr-only"
       />
